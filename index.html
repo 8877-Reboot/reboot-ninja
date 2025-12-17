@@ -758,7 +758,7 @@
         .input-area-wrapper { padding: 20px; background: rgba(0,0,0,0.6); border-top: 1px solid rgba(255,255,255,0.1); }
         .input-area { display: flex; gap: 10px; background: rgba(255,255,255,0.08); padding: 8px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); }
         .chat-input { flex-grow: 1; background: transparent; border: none; color: white; padding: 10px 15px; font-size: 1rem; outline: none; }
-        .send-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--action-red); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .send-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--action-red); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0;}
         .send-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--action-red); }
 
         /* Detail Page, RWD... */
@@ -865,7 +865,7 @@
             <div id="typingIndicator" class="typing-indicator" style="display:none; margin-left:20px;"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
             <div class="input-area-wrapper">
                 <div class="input-area">
-                    <input type="text" class="chat-input" id="chatInput" placeholder="問我問題... (例如：場館在哪？)" onkeypress="if(event.key === 'Enter') handleChat()">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="問我問題..." onkeypress="if(event.key === 'Enter') handleChat()">
                     <button class="send-btn" onclick="handleChat()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
                 </div>
             </div>
