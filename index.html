@@ -1,0 +1,1963 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RE:BOOT Ninja Warrior - 極限體能王</title>
+    <!-- 載入 Inter 字體 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ===== 變數與基本設定 (紅黑主題) ===== */
+        :root {
+            --bg-main: #0a0a0a;       
+            --bg-secondary: #1a0505;  
+            --action-red: #E53020;    
+            --accent-gold: #ffd700;
+            --text-light: #FFFFFF;
+            --text-secondary: #b3b3b3; 
+            --text-highlight: #ff4d4d; 
+            --nav-height: 80px;
+            
+            --noise-url: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.07'/%3E%3C/svg%3E");
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; color: inherit; cursor: pointer; }
+        img { max-width: 100%; display: block; }
+        ul { list-style: none; }
+
+        /* ===== 動畫定義 ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(46, 204, 113, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+        }
+        @keyframes typing {
+            0% { opacity: 0.3; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-3px); }
+            100% { opacity: 0.3; transform: translateY(0); }
+        }
+
+        /* ===== 共用類別 ===== */
+        .container {
+            width: 90%; max-width: 1200px; margin: 0 auto; position: relative;
+        }
+        /* 滾動出現動畫 */
+        .reveal {
+            opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+        .reveal.delay-100 { transition-delay: 0.1s; }
+        .reveal.delay-200 { transition-delay: 0.2s; }
+        .reveal.delay-300 { transition-delay: 0.3s; }
+        .reveal.delay-400 { transition-delay: 0.4s; }
+        .reveal.delay-500 { transition-delay: 0.5s; }
+
+        /* ===== 導航欄 ===== */
+        .navbar {
+            display: flex; align-items: center; height: var(--nav-height);
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(229, 48, 32, 0.1);
+        }
+        .navbar .container { display: flex; justify-content: space-between; align-items: center; }
+        .logo-link { transition: transform 0.3s; }
+        .logo-link:hover { transform: scale(1.05); }
+        .logo-img { height: 140px; width: auto; }
+
+        .nav-menu { display: flex; align-items: center; }
+        .nav-menu li { margin-left: 2rem; }
+        .nav-menu a {
+            color: var(--text-secondary); font-weight: 700; font-size: 0.9rem;
+            position: relative; padding-bottom: 5px; transition: color 0.3s;
+        }
+        .nav-menu a.active, .nav-menu a:hover { color: var(--text-light); }
+        .nav-menu a::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px;
+            background: var(--action-red); transition: width 0.3s;
+        }
+        .nav-menu a.active::after, .nav-menu a:hover::after { width: 100%; }
+
+        .nav-right-group { display: flex; align-items: center; }
+        .nav-search-btn {
+            margin-left: 1.5rem; width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(229,48,32,0.1); border: 1px solid rgba(229,48,32,0.3);
+            color: white; cursor: pointer; transition: 0.3s; position: relative;
+        }
+        .nav-search-btn:hover { background: var(--action-red); transform: scale(1.1); box-shadow: 0 0 15px rgba(229,48,32,0.5); }
+        
+        .nav-menu-toggle { display: none; font-size: 1.5rem; color: var(--action-red); margin-left: 20px; cursor: pointer; }
+
+        /* ===== 頁面切換 ===== */
+        .page-section { display: none; padding-top: var(--nav-height); min-height: 100vh; animation: fadeIn 0.5s ease; }
+        .page-section.active-page { display: block; }
+
+        /* ===== Hero Section ===== */
+        .hero-section {
+            height: 100vh; min-height: 600px; background-color: var(--bg-main);
+            position: relative; display: flex; align-items: center;
+            margin-top: -80px; padding-top: 80px;
+            transition: background-color 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden; /* Ensure video doesn't overflow */
+        }
+        .hero-bg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.02), rgba(0,0,0,0.8));
+            pointer-events: none; z-index: 1;
+        }
+        /* Noise texture above video */
+        .hero-section::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: var(--noise-url); z-index: 1; pointer-events: none; opacity: 0.4;
+        }
+        
+        /* NEW: Hero Right Background (Video/GIF area) */
+        .hero-right-bg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 65%; /* Cover right side */
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .hero-right-bg video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.6; /* Blend slightly */
+            filter: contrast(1.2) grayscale(100%); /* Make it silhouette-like */
+            transition: opacity 0.5s ease; /* Smooth transition for video swap */
+        }
+        
+        .hero-right-bg video.fade-out {
+            opacity: 0;
+        }
+
+        /* Gradient Mask for Smooth Transition */
+        .hero-right-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Gradient from solid background (left) to transparent (right) */
+            background: linear-gradient(90deg, var(--bg-main) 10%, rgba(10,10,10,0.8) 40%, transparent 100%);
+        }
+        
+        .hero-content {
+            position: relative; z-index: 2; max-width: 60%; /* Limit width to avoid overlap */
+            animation: float 6s ease-in-out infinite; 
+            padding-left: 20px; /* Ensure padding from edge */
+        }
+        
+        /* New Wrapper for Text Animation Only */
+        .hero-text-anim {
+            transition: opacity 0.5s ease;
+        }
+        .hero-text-anim.fade-out { opacity: 0; transform: translateY(20px); }
+
+        /* Increased Sizes */
+        .hero-content h1 { font-size: 7rem; font-weight: 900; line-height: 1; margin-bottom: 1.5rem; }
+        .en-title {
+            display: block; font-size: 4.5rem; letter-spacing: 4px; color: var(--action-red);
+            background: linear-gradient(90deg, #ff0000, #b30000);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .hero-content p { font-size: 1.8rem; color: var(--text-highlight); margin-bottom: 3rem; letter-spacing: 2px; font-weight: 700; }
+        
+        .cta-button {
+            display: inline-block; padding: 20px 60px; background: var(--action-red);
+            color: white; border-radius: 50px; font-weight: 800; transition: 0.3s;
+            border: 2px solid transparent; font-size: 1.5rem; letter-spacing: 2px;
+            box-shadow: 0 10px 40px rgba(229,48,32,0.3);
+        }
+        .cta-button:hover { 
+            transform: translateY(-5px) scale(1.05); background: transparent; 
+            border-color: var(--action-red); color: var(--action-red);
+            box-shadow: 0 20px 50px rgba(229,48,32,0.5); 
+        }
+        
+        /* Hero Side Panel (News Widget) */
+        .hero-side-panel {
+            position: absolute; bottom: 50px; right: 0; 
+            background: rgba(20,20,20,0.8); backdrop-filter: blur(15px);
+            padding: 20px 30px; border-radius: 12px; 
+            display: flex; flex-direction: column;
+            border-left: 4px solid var(--action-red);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10;
+            max-width: 350px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .hero-side-panel:hover { transform: translateX(-10px); background: rgba(30,30,30,0.9); }
+        
+        .news-widget-label {
+            color: var(--action-red);
+            font-size: 0.8rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .news-widget-label::before {
+            content: ''; width: 8px; height: 8px; background: var(--action-red); border-radius: 50%; display: inline-block; animation: pulse-green 2s infinite;
+        }
+        .news-widget-title {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .news-widget-arrow {
+            margin-top: 10px;
+            color: #888;
+            font-size: 0.9rem;
+            align-self: flex-end;
+            font-weight: 600;
+        }
+
+        /* ===== 標題樣式 ===== */
+        .sub-page-header {
+            background: linear-gradient(135deg, #000000 0%, #330000 100%);
+            padding: 100px 0 80px; text-align: center; margin-bottom: 40px;
+            border-bottom: 2px solid var(--action-red); position: relative; overflow: hidden;
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 50% 100%, 0 85%);
+        }
+        .sub-page-header::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(circle at 50% 0%, rgba(229, 48, 32, 0.2), transparent 70%), var(--noise-url);
+            pointer-events: none;
+        }
+        .sub-page-header h1 {
+            position: relative; z-index: 2; font-size: 3.5rem; font-weight: 900; 
+            text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .section-header { margin-bottom: 40px; }
+        .section-header h2 { font-size: 3rem; font-weight: 900; margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 0 20px rgba(255,0,0,0.3); }
+        .section-header p { font-size: 1.2rem; color: var(--text-highlight); font-weight: 700; }
+
+        /* ===== Intro, Stages, Legends (Updated Gradients) ===== */
+        .intro-section {
+            padding: 120px 0;
+            background: linear-gradient(180deg, var(--bg-main) 0%, #1a0505 50%, #000000 100%);
+            position: relative;
+            z-index: 2;
+        }
+
+        .stages-section { 
+            padding: 120px 0; 
+            background: linear-gradient(180deg, #000000 0%, #330000 40%, #000000 100%);
+        }
+        
+        .stages-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; }
+        .stage-card {
+            background: rgba(20,20,20,0.9); border-radius: 12px; overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05); transition: 0.4s;
+            display: flex; flex-direction: column;
+        }
+        .stage-card:hover { transform: translateY(-10px); border-color: var(--action-red); box-shadow: 0 20px 40px rgba(255,0,0,0.2); }
+        .stage-card img { width: 100%; height: 350px; object-fit: cover; opacity: 0.8; transition: 0.4s; filter: grayscale(30%); }
+        .stage-card:hover img { opacity: 1; transform: scale(1.05); filter: grayscale(0%); }
+        .card-content { padding: 30px; background: linear-gradient(to top, black 20%, transparent); margin-top: -100px; position: relative; z-index: 2; }
+        .card-content h3 { font-size: 1.8rem; margin-bottom: 10px; text-shadow: 2px 2px 0 black; font-weight: 900; }
+        .card-content p { color: #aaa; margin-bottom: 15px; font-size: 0.95rem; }
+        .card-content .details-link { color: var(--action-red); font-weight: 700; font-size: 1rem; display: inline-flex; align-items: center; text-shadow: 1px 1px 2px black; transition: 0.3s; }
+        .card-content .details-link:hover { color: var(--text-highlight); transform: translateX(5px); }
+
+        .legends-section { 
+            padding: 120px 0; 
+            background: linear-gradient(180deg, #000000 0%, #1a0505 50%, #050505 100%);
+            overflow: hidden; 
+        }
+        
+        .legends-container { width: 100%; overflow: hidden; position: relative; }
+        .legends-grid { display: flex; gap: 40px; width: max-content; transition: transform 0.5s ease-in-out; }
+        .legend-card {
+            flex: 0 0 300px; height: 450px; background: rgba(255,255,255,0.03); border-radius: 15px;
+            position: relative; overflow: hidden; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+            transition: 0.3s; display: flex; flex-direction: column; justify-content: flex-end;
+        }
+        .legend-card:hover { transform: translateY(-10px); border-color: var(--accent-gold); box-shadow: 0 0 30px rgba(255,215,0,0.2); }
+        .legend-card::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(skewX(-25deg), transparent, rgba(255,215,0,0.2), transparent);
+            transition: 0.5s; transform: skewX(-25deg);
+        }
+        .legend-card:hover::after { left: 150%; transition: 0.7s; }
+        
+        .legend-icon-wrapper {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(to bottom, #222, #000); transition: 0.4s;
+        }
+        .legend-icon-wrapper img {
+            width: 100%; height: 100%; object-fit: cover; transition: 0.5s; filter: grayscale(50%);
+        }
+        .legend-card:hover .legend-icon-wrapper img {
+            filter: grayscale(0%); transform: scale(1.05);
+        }
+        
+        .legend-info { position: relative; z-index: 2; padding: 25px; background: linear-gradient(to top, black 40%, transparent); }
+        .legend-title { color: var(--accent-gold); font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; margin-bottom: 5px; text-transform: uppercase; }
+        .legend-name { color: white; font-size: 2rem; font-weight: 900; line-height: 1; }
+        .legend-achievement { color: #ccc; font-size: 0.9rem; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 10px; }
+
+        .legend-detail-img img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        /* ===== Gym Section ===== */
+        .gym-info-container { display: grid; grid-template-columns: 4fr 6fr; gap: 40px; align-items: stretch; min-height: 500px; }
+        .gym-details {
+            padding: 40px; background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(229,48,32,0.3); border-radius: 15px;
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        .gym-details h3 { font-size: 2.2rem; color: var(--action-red); margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
+        .gym-description { margin-bottom: 35px; color: #ddd; font-size: 1.15rem; line-height: 1.8; }
+        .gym-info-item { display: flex; margin-bottom: 25px; align-items: flex-start; }
+        .gym-info-item svg { min-width: 20px; width: 20px; height: 20px; margin-right: 20px; margin-top: 5px; color: var(--text-highlight); }
+        .gym-info-item span, .gym-info-item div { font-size: 1.25rem; font-weight: 500; color: white; }
+        
+        .map-container { 
+            border-radius: 15px; 
+            overflow: hidden; 
+            border: 1px solid rgba(255,255,255,0.1); 
+            height: 100%; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative; 
+        }
+        
+        .map-link-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20; 
+            background: rgba(0,0,0,0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .map-link-overlay:hover {
+            background: rgba(0,0,0,0.4);
+        }
+
+        .map-action-btn {
+            background: var(--action-red);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .map-link-overlay:hover .map-action-btn {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* ===== About, Gallery ===== */
+        .about-content { display: flex; gap: 50px; align-items: flex-start; }
+        .about-text { flex: 1; } .about-image { flex: 1; }
+        .about-text h3 { color: var(--action-red); font-size: 1.8rem; margin-bottom: 15px; margin-top: 30px; font-weight: 900; }
+        .about-text h3:first-child { margin-top: 0; }
+        .about-text p { font-size: 1.1rem; color: #ddd; margin-bottom: 15px; }
+        .about-image img { border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
+
+        .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .gallery-item { position: relative; overflow: hidden; border-radius: 10px; height: 250px; cursor: pointer; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .gallery-item:hover img { transform: scale(1.1); }
+        .gallery-overlay { position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(229,48,32,0.6); display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; opacity: 0; transition: 0.3s; letter-spacing: 2px; }
+        .gallery-item:hover .gallery-overlay { opacity: 1; }
+        /* ===== Lightbox 燈箱樣式 ===== */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 3000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+
+            .lightbox.active {
+                opacity: 1;
+                visibility: visible;
+            }
+
+            .lightbox img {
+                max-width: 90%;
+                max-height: 90%;
+                border: 2px solid var(--action-red);
+                box-shadow: 0 0 50px rgba(229, 48, 32, 0.3);
+                transform: scale(0.9);
+                transition: 0.3s;
+            }
+
+            .lightbox.active img {
+                transform: scale(1);
+            }
+
+        .lightbox-close {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            .lightbox-close:hover {
+                color: var(--action-red);
+                transform: rotate(90deg);
+            }
+        
+        /* ===== Video Section (Static Cards Style) ===== */
+        .video-section { padding: 150px 0; background: #050505 url('https://images.unsplash.com/photo-1506192176840-79d20c58e08d?q=80&w=1920&auto=format&fit=crop') center/cover fixed; text-align: center; position: relative; }
+        .video-section::before { 
+            content: ''; position: absolute; top:0; left:0; width:100%; height:100%; 
+            background: linear-gradient(180deg, #050505 0%, rgba(0,0,0,0.7) 20%, rgba(0,0,0,0.7) 80%, #0a0a0a 100%);
+            pointer-events: none;
+        }
+        .video-section .container { position: relative; z-index: 2; }
+        .video-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 50px; }
+        
+        .video-card { 
+            position: relative; padding-bottom: 56.25%; background: #111; 
+            border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); 
+            transition: 0.3s; z-index: 5; pointer-events: auto;
+            display: block; text-decoration: none;
+        }
+        .video-card:hover { transform: translateY(-5px); border-color: var(--action-red); box-shadow: 0 10px 30px rgba(229,48,32,0.3); }
+        
+        .video-card-content {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+        }
+        
+        .video-card-icon {
+            width: 64px; height: 64px; fill: #ff0000; margin-bottom: 15px;
+            transition: transform 0.3s ease; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+        .video-card:hover .video-card-icon { transform: scale(1.1); filter: drop-shadow(0 0 15px rgba(255,0,0,0.6)); }
+        
+        .video-card-title {
+            color: white; font-size: 1.2rem; font-weight: 700; text-align: center;
+            margin-bottom: 5px; padding: 0 20px; line-height: 1.4;
+        }
+        .video-card-action {
+            color: #aaa; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-top: 10px;
+            border: 1px solid #333; padding: 5px 15px; border-radius: 20px; transition: 0.3s;
+        }
+        .video-card:hover .video-card-action { background: var(--action-red); color: white; border-color: var(--action-red); }
+
+        .channel-link-btn { display: inline-flex; align-items: center; padding: 12px 35px; margin-top: 40px; background: rgba(229,48,32,0.1); border: 1px solid var(--action-red); color: var(--action-red); font-weight: 900; border-radius: 50px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .channel-link-btn:hover { background: var(--action-red); color: white; transform: scale(1.05); }
+
+        /* ===== Contact - Simplified ===== */
+        .contact-info-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(229,48,32,0.3);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .contact-intro {
+            font-size: 1.2rem; color: #ddd; margin-bottom: 30px;
+        }
+        
+        .contact-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .contact-method-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px 30px;
+            border-radius: 50px;
+            width: 100%;
+            max-width: 400px;
+            transition: 0.3s;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            overflow: hidden;
+            word-break: break-all; 
+        }
+        
+        .contact-method-item:hover {
+            background: var(--action-red);
+            border-color: var(--action-red);
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(229,48,32,0.4);
+        }
+        
+        .contact-method-item svg { min-width: 24px; width: 24px; height: 24px; fill: currentColor; }
+
+        /* ===== News (General) ===== */
+        #news-home { 
+            padding: 120px 0;
+            background: linear-gradient(180deg, #0a0a0a 0%, #111 100%);
+        }
+
+        .news-item { background: #111; padding: 30px; border-radius: 10px; margin-bottom: 25px; border-left: 5px solid var(--action-red); transition: 0.3s; position: relative; cursor: pointer; }
+        .news-item:hover { background: #1a1a1a; transform: translateX(10px); }
+        .news-date { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 8px; font-family: monospace; }
+        .news-title { font-size: 1.5rem; font-weight: 700; color: white; margin-bottom: 10px; }
+        .news-item p { color: #ccc; }
+
+        /* ===== News Related (New Section) ===== */
+        .news-related-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .news-related-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            transition: 0.3s;
+            min-height: 250px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .news-related-card:hover {
+            border-color: var(--action-red);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(229, 48, 32, 0.15);
+        }
+
+        .news-source-badge {
+            background: var(--action-red);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 15px;
+            align-self: flex-start;
+        }
+
+        .news-related-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .news-related-date {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .news-read-more {
+            color: var(--action-red);
+            font-weight: 700;
+            text-decoration: none;
+            border: 1px solid var(--action-red);
+            padding: 10px 20px;
+            border-radius: 30px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .news-read-more:hover {
+            background: var(--action-red);
+            color: white;
+        }
+
+        .load-more-btn-container {
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .load-more-btn {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--text-secondary);
+            padding: 10px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+
+        .load-more-btn:hover {
+            border-color: var(--action-red);
+            color: var(--action-red);
+        }
+        
+        /* Footer & Social - Enhanced for Desktop */
+        .social-section { 
+            padding: 80px 0; 
+            text-align: center; 
+            position: relative; 
+            z-index: 10; 
+            background: linear-gradient(180deg, #111 0%, var(--bg-main) 100%);
+            overflow: hidden;
+        }
+        
+        /* Background Highlight Effect */
+        .social-section::after {
+            content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80%; height: 80%;
+            background: radial-gradient(circle, rgba(229,48,32,0.08) 0%, transparent 70%);
+            pointer-events: none; z-index: 1;
+        }
+
+        .social-section h2 {
+            font-size: 2.2rem;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 20;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+
+        .social-buttons { display: flex; justify-content: center; gap: 20px; margin-top: 30px; position: relative; z-index: 20; flex-wrap: wrap; }
+        
+        .social-btn { 
+            display: flex; align-items: center; gap: 15px; padding: 15px 35px; 
+            border-radius: 60px; font-weight: 800; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            border: 2px solid rgba(255,255,255,0.15); 
+            background: rgba(255,255,255,0.03);
+            backdrop-filter: blur(5px);
+            cursor: pointer; position: relative;
+            font-size: 1.1rem; color: white;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        
+        .social-btn svg { width: 28px; height: 28px; fill: currentColor; transition: 0.3s; }
+        
+        .btn-yt:hover { background: #ff0000; color: white; border-color: #ff0000; box-shadow: 0 10px 40px rgba(255,0,0,0.5); transform: translateY(-5px) scale(1.05); }
+        .btn-ig:hover { background: #E1306C; color: white; border-color: #E1306C; box-shadow: 0 10px 40px rgba(225,48,108,0.5); transform: translateY(-5px) scale(1.05); }
+        
+        /* Desktop Specific Enlargement */
+        @media (min-width: 992px) {
+            .social-section { padding: 150px 0; }
+            .social-section h2 { 
+                font-size: 5rem; 
+                margin-bottom: 60px; 
+                letter-spacing: 5px;
+                font-weight: 900;
+            }
+            .social-buttons { gap: 60px; }
+            .social-btn { 
+                padding: 30px 70px; 
+                font-size: 2rem; 
+                border-width: 3px;
+                border-radius: 100px;
+            }
+            .social-btn svg { width: 45px; height: 45px; }
+        }
+        
+        .footer { padding: 40px 0; text-align: center; color: var(--text-secondary); border-top: 1px solid rgba(255,255,255,0.1); margin-top: 80px; }
+        .back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; background: var(--action-red); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 999; opacity: 0; visibility: hidden; transition: 0.3s; transform: translateY(20px); }
+        .back-to-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        /* ===== AI Search Modal & News Modal ===== */
+        .search-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(15px); z-index: 2000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: all 0.4s ease; }
+        .search-modal.active { opacity: 1; visibility: visible; }
+        .modal-content { width: 90%; max-width: 700px; height: 70vh; background: rgba(15, 15, 15, 0.95); border: 1px solid var(--action-red); border-radius: 20px; padding: 0; box-shadow: 0 0 60px rgba(229, 48, 32, 0.25); transform: translateY(30px); transition: transform 0.4s ease; display: flex; flex-direction: column; overflow: hidden; }
+        .search-modal.active .modal-content { transform: translateY(0); }
+        .ai-header { padding: 20px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.1); position: relative; }
+        .ai-header h3 { display: flex; align-items: center; color: white; margin: 0; font-size: 1.3rem; font-weight: 700; }
+        .status-dot { width: 10px; height: 10px; background: #2ecc71; border-radius: 50%; margin-right: 12px; animation: pulse-green 2s infinite; }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: var(--text-secondary); cursor: pointer; transition: 0.3s; line-height: 1; }
+        .modal-close:hover { color: var(--action-red); }
+        .chat-container { flex-grow: 1; overflow-y: auto; padding: 20px; background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px; background-color: rgba(0,0,0,0.3); scroll-behavior: smooth; }
+        .message { margin-bottom: 20px; display: flex; flex-direction: column; opacity: 0; animation: fadeIn 0.3s ease forwards; }
+        .message.user { align-items: flex-end; }
+        .message.ai { align-items: flex-start; }
+        .msg-bubble { max-width: 80%; padding: 12px 18px; font-size: 0.95rem; line-height: 1.6; box-shadow: 0 4px 10px rgba(0,0,0,0.3); word-wrap: break-word; }
+        .message.user .msg-bubble { background: linear-gradient(135deg, var(--action-red), #b30000); color: white; border-radius: 18px 18px 4px 18px; }
+        .message.ai .msg-bubble { background: #222; color: #eee; border-radius: 18px 18px 18px 4px; border: 1px solid rgba(255,255,255,0.1); }
+        .typing-indicator { display: flex; gap: 4px; padding: 10px 15px; background: #222; border-radius: 18px 18px 18px 4px; width: fit-content; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
+        .typing-dot { width: 6px; height: 6px; background: #aaa; border-radius: 50%; animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        .input-area-wrapper { padding: 20px; background: rgba(0,0,0,0.6); border-top: 1px solid rgba(255,255,255,0.1); }
+        .input-area { display: flex; gap: 10px; background: rgba(255,255,255,0.08); padding: 8px; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(5px); }
+        .chat-input { flex-grow: 1; background: transparent; border: none; color: white; padding: 10px 15px; font-size: 1rem; outline: none; }
+        .send-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--action-red); border: none; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .send-btn:hover { transform: scale(1.05); box-shadow: 0 0 15px var(--action-red); }
+
+        /* Detail Page, RWD... */
+        .legend-detail-container { display: flex; gap: 50px; margin-top: 40px; animation: fadeIn 0.5s; }
+        .legend-detail-img { flex: 1; border-radius: 15px; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.5); border: 2px solid var(--action-red); display: flex; align-items: center; justify-content: center; background: #111; min-height: 400px; }
+        .legend-detail-img svg { width: 50%; fill: #333; }
+        .legend-detail-content { flex: 1.5; }
+        .legend-detail-name { font-size: 4rem; font-weight: 900; line-height: 1; margin-bottom: 10px; color: white; }
+        .legend-detail-title { font-size: 1.5rem; color: var(--accent-gold); font-weight: 700; margin-bottom: 30px; }
+        .legend-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 10px; }
+        .stat-item h4 { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 5px; }
+        .stat-item p { font-size: 1.5rem; font-weight: 900; color: white; }
+        
+        @media (max-width: 992px) {
+            .hero-content { max-width: 100%; text-align: center; }
+            .hero-section .container { justify-content: center; }
+            .hero-side-panel { display: none; }
+            .stages-grid { grid-template-columns: repeat(2, 1fr); }
+            .gym-info-container { grid-template-columns: 1fr; }
+            .map-container { height: 400px; }
+            .about-content { flex-direction: column; }
+            .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+            
+            /* Mobile Adjustments for Enlarged Text */
+            .hero-content h1 { font-size: 4rem; }
+            .en-title { font-size: 2.5rem; }
+            .hero-content p { font-size: 1.3rem; }
+        }
+        @media (max-width: 768px) {
+            .nav-menu { display: none; position: absolute; top: var(--nav-height); left: 0; width: 100%; background: #0a0a0a; flex-direction: column; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+            .nav-menu.active { display: flex; }
+            .nav-menu li { margin: 10px 0; }
+            .nav-menu-toggle { display: block; }
+            .hero-content h1 { font-size: 3.5rem; }
+            .hero-content .en-title { font-size: 2rem; }
+            .sub-page-header { padding: 60px 0 40px; }
+            .sub-page-header h1 { font-size: 2.2rem; }
+            .section-header h2 { font-size: 2rem; }
+            .legend-detail-name { font-size: 2.5rem; }
+            .gym-details h3 { font-size: 1.8rem; }
+            .gym-info-item span, .gym-info-item div { font-size: 1.1rem; }
+            .stages-grid { grid-template-columns: 1fr; }
+            
+            /* Mobile Carousel - Fix */
+            .legend-card { flex: 0 0 85vw; margin-right: 20px; }
+            .legends-grid { gap: 0; }
+            
+            .legend-detail-container { flex-direction: column; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            .section-header, .page-section { padding-left: 20px; padding-right: 20px; }
+            .stages-section, .legends-section, .video-section { padding: 60px 0; }
+            
+            /* Fix Contact Overflow */
+            .contact-info-card { padding: 20px; }
+            .contact-method-item { font-size: 0.9rem; padding: 10px 20px; max-width: 100%; }
+        }
+        
+        /* News Modal Specifics */
+        #newsModal .modal-content {
+            height: auto;
+            max-height: 85vh;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 導航欄 -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="logo-link" onclick="showPage('home')">
+                <img src="image/REBOOT LOGO_有字_1.png" alt="RE:BOOT Logo" class="logo-img">
+            </a>
+            <div class="nav-right-group">
+                <ul class="nav-menu" id="navMenu">
+                    <li><a href="#" onclick="showPage('home')" class="nav-link active" data-target="home">首頁</a></li>
+                    <li><a href="#" onclick="showPage('about')" class="nav-link" data-target="about">關於極限體能王</a></li>
+                    <li><a href="#" onclick="showPage('stages')" class="nav-link" data-target="stages">關卡介紹</a></li>
+                    <li><a href="#" onclick="showPage('gym')" class="nav-link" data-target="gym">體能王場館</a></li>
+                    <li><a href="#" onclick="showPage('gallery')" class="nav-link" data-target="gallery">精彩圖輯</a></li>
+                    <li><a href="#" onclick="showPage('news-related')" class="nav-link" data-target="news-related">相關新聞</a></li>
+                    <li><a href="#" onclick="showPage('news')" class="nav-link" data-target="news">最新消息</a></li>
+                    <li><a href="#" onclick="showPage('contact')" class="nav-link" data-target="contact">聯絡我們</a></li>
+                </ul>
+                <div class="nav-search-btn" onclick="toggleSearch()" title="RE:BOOT AI">
+                    <!-- 使用對話氣泡圖示替代搜尋放大鏡 -->
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                </div>
+                <div class="nav-menu-toggle" onclick="toggleMenu()">&#9776;</div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- AI Search Modal -->
+    <div class="search-modal" id="searchModal">
+        <div class="modal-content">
+            <div class="ai-header">
+                <h3><div class="status-dot"></div> RE:BOOT AI</h3>
+                <span class="modal-close" onclick="toggleSearch()">&times;</span>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:5px; margin-left:22px;">您的極限體能王專屬助手</p>
+            </div>
+            <div class="chat-container" id="chatContainer">
+                <div class="message ai"><div class="msg-bubble">你好！歡迎來到 RE:BOOT。<br>這裡是<b>極限體能王</b>推廣社群。我可以協助您查詢<b>場館資訊</b>、<b>關卡介紹</b>或<b>官方賽事資訊</b>。<br>請問有什麼能幫您？</div></div>
+            </div>
+            <div id="typingIndicator" class="typing-indicator" style="display:none; margin-left:20px;"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
+            <div class="input-area-wrapper">
+                <div class="input-area">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="問我問題... (例如：場館在哪？)" onkeypress="if(event.key === 'Enter') handleChat()">
+                    <button class="send-btn" onclick="handleChat()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- News Details Modal -->
+    <div class="search-modal" id="newsModal">
+        <div class="modal-content">
+            <div class="ai-header">
+                 <h3><div class="status-dot" style="background:var(--action-red);box-shadow:0 0 8px var(--action-red);"></div> 最新消息詳情</h3>
+                 <span class="modal-close" onclick="closeNewsModal()">&times;</span>
+            </div>
+            <div class="chat-container" style="padding: 30px;">
+                 <h2 id="newsModalTitle" style="color:white; margin-bottom:10px; font-size:1.5rem;"></h2>
+                 <div id="newsModalDate" style="color:var(--text-secondary); margin-bottom:20px; font-size:0.9rem; font-family:monospace;"></div>
+                 <div id="newsModalBody" style="color:#ddd; line-height:1.8; font-size:1rem; white-space: pre-wrap;"></div>
+                 
+                 <!-- Social Buttons in Modal -->
+                 <div style="margin-top:30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                     <a href="https://youtube.com/channel/UCKKjNeaO-utqKn3rbh3jVQg?si=OWm9DHckGYcKE4XC" target="_blank" class="channel-link-btn" style="font-size:0.9rem; padding:10px 25px; margin-top: 0; display: flex; align-items: center; gap: 8px;">
+                        <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                        觀看影片
+                     </a>
+                     <a href="https://www.instagram.com/sasuke_reboot/" target="_blank" class="channel-link-btn" style="font-size:0.9rem; padding:10px 25px; margin-top: 0; display: flex; align-items: center; gap: 8px;">
+                        <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:currentColor;"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg> Instagram</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <main>
+        <!-- 首頁 -->
+        <div id="home" class="page-section active-page">
+            <header class="hero-section" id="heroSection">
+                <!-- NEW: Right Side Video Background -->
+                <div class="hero-right-bg">
+                    <!-- Video ID added for JS control -->
+                    <video id="heroVideo" autoplay muted loop playsinline poster="image/hero_bg.jpg">
+                        <source src="video/5320004-uhd_3840_2160_25fps.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+
+                <div class="hero-bg-overlay"></div>
+                <div class="container">
+                    <div class="hero-content">
+                        <!-- NEW: Separate Wrapper for Text Animation -->
+                        <div class="hero-text-anim" id="heroTextAnim">
+                            <h1><span class="en-title" id="heroEnTitle">RE:BOOT</span><span id="heroZhTitle">極限體能王</span></h1>
+                            <p id="heroSubtitle">力量、速度與敏捷的終極試煉。</p>
+                        </div>
+
+                        <!-- CTA Button now outside the animation loop -->
+                        <a href="#" onclick="scrollToHomeStages(event)" class="cta-button">立即開始</a>
+                    </div>
+
+                    <!-- Right Side Panel Removed -->
+                </div>
+            </header>
+
+            <!-- 新增：關於 RE:BOOT 介紹區塊 -->
+            <section class="intro-section">
+                <div class="container reveal">
+                    <div class="section-header" style="text-align: center;">
+                        <h2>關於 RE:BOOT 極限體能王</h2>
+                        <p style="color:var(--text-highlight)">喚醒你體內的忍者靈魂</p>
+                    </div>
+                    <div style="max-width: 800px; margin: 0 auto; text-align: center; color: #ccc; font-size: 1.15rem; line-height: 2;">
+                        <p>我們是一群熱愛<b>極限體能王 (SASUKE)</b> 的忠實粉絲。</p>
+                        <p style="margin-top: 20px;">
+                            <b>RE:BOOT</b> 代表著重新啟動。我們成立的初衷，是希望將這項結合力量、速度與毅力的運動推廣給更多人。<br>
+                            在這裡，我們彙整賽事資訊、分享訓練技巧，並連結全台各地的挑戰者。<br>
+                            無論你是追求體能巔峰的強者，還是單純想挑戰自我的初心者，這裡都是你的起點。
+                        </p>
+                        <p style="margin-top: 25px; color: white; font-weight: 700; font-size: 1.3rem; letter-spacing: 1px;">讓我們一起 RE:BOOT，突破極限！</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="stages-section" id="home-stages">
+                <div class="container">
+                    <div class="section-header reveal"><h2>四大關卡</h2><p>征服那些挑戰極限、難以跨越的障礙。</p></div>
+                    <div class="stages-grid">
+                        <div class="stage-card reveal delay-100">
+                            <img src="image/stage_01.jpg" onerror="this.src='https://via.placeholder.com/400x300?text=Quintuple+Step'">
+                            <div class="card-content" style="background: linear-gradient(to top, #001a1a 20%, rgba(0, 77, 64, 0.6) 80%, transparent 100%); border-bottom: 4px solid #009688;">
+                                <h3 style="text-shadow: 0 0 10px rgba(0, 150, 136, 0.5);">五段跳</h3>
+                                <p style="color:#26a69a; font-size:0.9rem; font-weight:bold;">First Stage</p>
+                                <p style="color:#ccc; margin-top:5px;">考驗爆發力與節奏感，錯一步即落水的經典開場。</p>
+                                <a onclick="showPage('stages')" class="details-link" style="color:white;">了解更多 →</a>
+                            </div>
+                        </div>
+
+                        <div class="stage-card reveal delay-200">
+                            <img src="image/stage_05.jpg" onerror="this.src='https://via.placeholder.com/400x300?text=Salmon+Ladder'">
+                            <div class="card-content" style="background: linear-gradient(to top, #1a0505 20%, rgba(183, 28, 28, 0.6) 80%, transparent 100%); border-bottom: 4px solid #E53020;">
+                                <h3 style="text-shadow: 0 0 10px rgba(229, 48, 32, 0.5);">鮭魚梯</h3>
+                                <p style="color:#ff5252; font-size:0.9rem; font-weight:bold;">Second Stage</p>
+                                <p style="color:#ccc; margin-top:5px;">利用身體擺盪與背肌爆發力，將橫桿向上推進的極限試煉。</p>
+                                <a onclick="showPage('stages')" class="details-link" style="color:white;">了解更多 →</a>
+                            </div>
+                        </div>
+
+                        <div class="stage-card reveal delay-300">
+                            <img src="image/stage_06.jpg" onerror="this.src='https://via.placeholder.com/400x300?text=Cliffhanger'">
+                            <div class="card-content" style="background: linear-gradient(to top, #12051a 20%, rgba(74, 20, 140, 0.6) 80%, transparent 100%); border-bottom: 4px solid #7c4dff;">
+                                <h3 style="text-shadow: 0 0 10px rgba(124, 77, 255, 0.5);">瘋狂側壁</h3>
+                                <p style="color:#b388ff; font-size:0.9rem; font-weight:bold;">Third Stage</p>
+                                <p style="color:#ccc; margin-top:5px;">僅靠指尖扣住 3 公分的突起邊緣，地獄般的指力考驗。</p>
+                                <a onclick="showPage('stages')" class="details-link" style="color:white;">了解更多 →</a>
+                            </div>
+                        </div>
+
+                        <div class="stage-card reveal delay-400">
+                            <img src="image/stage_08.jpg" onerror="this.src='https://via.placeholder.com/400x300?text=Final+Rope'">
+                            <div class="card-content" style="background: linear-gradient(to top, #1a1500 20%, rgba(255, 143, 0, 0.4) 80%, transparent 100%); border-bottom: 4px solid #ffd700;">
+                                <h3 style="text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);">最終攀繩</h3>
+                                <p style="color:#ffd700; font-size:0.9rem; font-weight:bold;">Final Stage</p>
+                                <p style="color:#ccc; margin-top:5px;">在體力耗盡前，垂直攀爬 24 公尺繩索，通往頂點的榮耀。</p>
+                                <a onclick="showPage('stages')" class="details-link" style="color:white;">了解更多 →</a>
+                            </div>
+                        </div>
+                    </div>
+            </section>
+
+            <section class="legends-section">
+                <div class="container reveal">
+                    <div class="section-header"><h2 style="color:white;text-shadow:0 0 20px rgba(255,215,0,0.4);">傳奇英雄榜</h2><p style="color:var(--accent-gold);">致敬那些超越極限、創造歷史的傳奇勇者</p></div>
+                    <p style="font-size: 0.85rem; color: #777; margin-top: 5px; font-weight: normal; letter-spacing: 1px;">
+                        ※ 註：本區選手圖片皆為 AI 生成之示意圖，非本人真實照片。
+                        <div class="legends-container"><div class="legends-grid" id="legendsGrid"></div></div>
+                </div>
+            </section>
+
+            <section class="ig-section" style="padding: 100px 0; background: #080808; position: relative; z-index: 5;">
+                <div class="container reveal">
+                    <div class="section-header" style="text-align: center; margin-bottom: 50px;">
+                        <h2 style="font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px;">
+                            <span style="color: #E1306C; margin-right: 15px; font-size: 2.2rem; vertical-align: middle;">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block; vertical-align:bottom;"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>
+                            </span>
+                            歡迎追隨官方IG帳號
+                        </h2>
+                        <p style="color: #aaa; font-size: 1.1rem; margin-top: 10px;">@SASUKE_REBOOT</p>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+
+                        <a href="https://www.instagram.com/p/DSPbGEtAZba/?img_index=3" target="_blank" class="ig-card" style="position: relative; padding-bottom: 100%; display: block; overflow: hidden; border-radius: 12px;">
+                            <img src="image/imageig_01.jpg" onerror="this.src='https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=600'" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: 0.5s;">
+                            <div class="ig-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s;">
+                                <span style="color: white; font-weight: bold; font-size: 1.2rem;">❤️ 22 &nbsp; 💬 1</span>
+                            </div>
+                        </a>
+
+                        <a href="https://www.instagram.com/p/DSPbGEtAZba/?img_index=3" target="_blank" class="ig-card" style="position: relative; padding-bottom: 100%; display: block; overflow: hidden; border-radius: 12px;">
+                            <img src="image/imageig_02.jpg" onerror="this.src='https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=600'" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: 0.5s;">
+                            <div class="ig-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s;">
+                                <span style="color: white; font-weight: bold; font-size: 1.2rem;">❤️ 22 &nbsp; 💬 1</span>
+                            </div>
+                        </a>
+
+                        <a href="https://www.instagram.com/p/DSPbGEtAZba/?img_index=3" target="_blank" class="ig-card" style="position: relative; padding-bottom: 100%; display: block; overflow: hidden; border-radius: 12px;">
+                            <img src="image/imageig_03.jpg" onerror="this.src='https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?q=80&w=600'" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: 0.5s;">
+                            <div class="ig-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s;">
+                                <span style="color: white; font-weight: bold; font-size: 1.2rem;">❤️ 22 &nbsp; 💬 1</span>
+                            </div>
+                        </a>
+
+                        <a href="https://www.instagram.com/p/DSPbGEtAZba/?img_index=3" target="_blank" class="ig-card" style="position: relative; padding-bottom: 100%; display: block; overflow: hidden; border-radius: 12px;">
+                            <img src="image/imageig_04.jpg" onerror="this.src='https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?q=80&w=600'" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; transition: 0.5s;">
+                            <div class="ig-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.3s;">
+                                <span style="color: white; font-weight: bold; font-size: 1.2rem;">❤️ 22 &nbsp; 💬 1</span>
+                            </div>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 40px;">
+                    <a href="https://www.instagram.com/sasuke_reboot/" target="_blank" class="channel-link-btn btn-ig-custom">
+                        <svg viewBox="0 0 24 24" style="width:20px; height:20px; fill:currentColor; margin-right:8px;"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg>
+                        前往官方 IG 觀看更多 →
+                    </a>
+                </div>
+
+                <style>
+                    /* 預設狀態：IG 粉色框線與文字 */
+                    .btn-ig-custom {
+                        border-color: #E1306C !important;
+                        color: #E1306C !important;
+                        background: rgba(225, 48, 108, 0.1);
+                    }
+                        /* 滑鼠懸停狀態：IG 經典漸層背景 */
+                        .btn-ig-custom:hover {
+                            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%) !important;
+                            color: white !important;
+                            border-color: transparent !important;
+                            transform: scale(1.05);
+                            box-shadow: 0 10px 30px rgba(220, 39, 67, 0.4);
+                        }
+                </style>
+
+                <style>
+                    .ig-card:hover img {
+                        transform: scale(1.1);
+                    }
+
+                    .ig-card:hover .ig-overlay {
+                        opacity: 1 !important;
+                    }
+                </style>
+            </section>
+
+            <!-- Video Section (Static Card Updated) -->
+            <section class="video-section">
+                <div class="container reveal">
+
+                    <div class="section-header">
+                        <h2>最新熱門影片</h2>
+                        <p style="color: var(--text-highlight);">鎖定 RE:BOOT 官方頻道，不錯過任何極限時刻</p>
+                    </div>
+                    <div class="video-grid">
+                        <!-- Video Card 1 -->
+                        <a href="https://www.youtube.com/watch?v=V7CBZiu4MP4" target="_blank" class="video-card">
+                            <div class="video-card-content">
+                                <svg class="video-card-icon" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" /></svg>
+                                <div class="video-card-title">Slab好可怕 - 技巧解析</div>
+                                <div class="video-card-action">點擊觀看</div>
+                            </div>
+                        </a>
+                        <!-- Video Card 2 -->
+                        <a href="https://www.youtube.com/watch?v=AJZIIPyCwi8" target="_blank" class="video-card">
+                            <div class="video-card-content">
+                                <svg class="video-card-icon" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" /></svg>
+                                <div class="video-card-title">抱石 POV - 實際體驗</div>
+                                <div class="video-card-action">點擊觀看</div>
+                            </div>
+                        </a>
+                        <!-- Video Card 3 -->
+                        <a href="https://www.youtube.com/watch?v=ITzlTgPHoAQ" target="_blank" class="video-card">
+                            <div class="video-card-content">
+                                <svg class="video-card-icon" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" /></svg>
+                                <div class="video-card-title">挑戰看看 - 你敢來嗎？</div>
+                                <div class="video-card-action">點擊觀看</div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="channel-link-container">
+                        <a href="https://youtube.com/channel/UCKKjNeaO-utqKn3rbh3jVQg?si=OWm9DHckGYcKE4XC" target="_blank" class="channel-link-btn">前往頻道觀看更多 &rarr;</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- News Section (Home Preview) -->
+            <section id="news-home">
+                <div class="container reveal">
+                    <div class="section-header">
+                        <h2>最新動態</h2>
+                        <p style="color:var(--text-highlight)">掌握第一手賽事資訊與報導</p>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;" id="home-news-container">
+                        <!-- Dynamic content injected via JS -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Social Media -->
+            <section class="social-section">
+                <div class="container reveal">
+                    <h2 style="font-size: 2.2rem; text-transform: uppercase;">Follow Us</h2>
+                    <div class="social-buttons">
+                        <a href="https://youtube.com/channel/UCKKjNeaO-utqKn3rbh3jVQg?si=OWm9DHckGYcKE4XC" target="_blank" class="social-btn btn-yt"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" /></svg> YouTube</a>
+                        <a href="https://www.instagram.com/sasuke_reboot/" target="_blank" class="social-btn btn-ig"><svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg> Instagram</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 體能王場館 (Gym) -->
+        <div id="gym" class="page-section">
+            <div class="sub-page-header"><h1>體能王場館</h1></div>
+            <div class="container">
+                <div class="gym-info-container">
+                    <div class="gym-details">
+                        <h3>GYMEFIT NINJA 忍者館</h3>
+                        <p class="gym-description">全台最專業的極限體能王訓練基地，擁有各種國際賽事級別的障礙關卡，無論是初學者想體驗攀岩樂趣，或是高手想挑戰極限，這裡都是你的最佳修練場。</p>
+                        <div class="gym-info-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg><span>台北市信義區基隆路一段25號1樓</span></div>
+                        <div class="gym-info-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span>02-87878277</span></div>
+                        <div class="gym-info-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon></svg><div><strong style="color:var(--accent-gold);display:block;margin-bottom:5px;">交通資訊：</strong><div style="font-size:1.1rem;color:#ccc;line-height:1.6;">捷運市政府站 (藍線) - 步行約13分鐘<br>捷運松山站 (綠線) - 步行約10分鐘<br>捷運南京三民站 (綠線) - 步行約10分鐘</div></div></div>
+                    </div>
+                    <div class="map-container">
+                        <!-- 點擊地圖直接跳轉至 Google Maps 搜尋結果 -->
+                        <a href="https://maps.app.goo.gl/DSBnWmaNkPCqemVo7" target="_blank" class="map-link-overlay" title="在 Google Maps 中開啟">
+                            <div class="map-action-btn">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                                在 Google Maps 中開啟
+                            </div>
+                        </a>
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3614.707686526136!2d121.56636737595676!3d25.04400283788547!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3442abb6da80a563%3A0x6b4478d65146313!2sGYMEFIT%20NINJA!5e0!3m2!1szh-TW!2stw!4v1700000000000!5m2!1szh-TW!2stw"
+                                width="100%"
+                                height="100%"
+                                style="border:0;"
+                                allowfullscreen=""
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="legend-detail" class="page-section"><div class="container"><a href="#" onclick="showPage('home')" class="back-link" style="color:#aaa;display:flex;align-items:center;margin-top:20px;">&larr; 返回首頁</a><div class="legend-detail-container" id="legendDetailContent"></div></div></div>
+
+        <!-- About Section -->
+        <div id="about" class="page-section">
+            <div class="sub-page-header"><h1>關於極限體能王</h1></div>
+            <div class="container"><div class="about-content"><div class="about-text"><h3>運動起源</h3><p>「極限體能王」(Sasuke) 是一項源自 1997 年的傳奇運動賽事，挑戰人類體能的極限。參賽者必須在有限的時間內，通過一系列高難度的障礙關卡。這不僅是對肌力、爆發力與平衡感的考驗，更是對意志力的終極磨練。</p><h3>完全制霸</h3><p>「完全制霸」是這項運動的最高榮譽。在數以千計的挑戰者中，只有極少數的菁英能夠攻克總決賽的巍峨高塔，按下終點的按鈕。這份榮耀，是所有忍者夢寐以求的目標。</p><h3>RE:BOOT 專題</h3><p style="color: var(--text-highlight);">RE:BOOT 是我們推廣極限體能王運動的專題計畫。</p><p>我們致力於將這項熱血的運動介紹給更多人，透過舉辦體驗活動、分享訓練知識以及報導國內外賽事，讓更多人感受到「挑戰自我、永不放棄」的忍者精神。</p></div><div class="about-image"><img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?q=80&w=800&auto=format&fit=crop" alt="Ninja Warrior Spirit"></div></div></div>
+        </div>
+
+        <!-- Stages Section -->
+        <div id="stages" class="page-section">
+            <div class="sub-page-header"><h1>關卡詳細介紹</h1></div>
+            <div class="container">
+                <div class="section-header">
+                    <h2>經典障礙解析</h2>
+                    <p style="color:var(--text-highlight)">從第一關到最終舞台，挑戰人類體能極限的八大試煉。</p>
+                </div>
+
+                <div class="stages-grid">
+                    <div class="stage-card">
+                        <img src="image/REBOOT LOGO background.png" onerror="this.src='https://via.placeholder.com/400x300?text=Quintuple+Step'">
+                        <div class="card-content">
+                            <h3>五段跳</h3>
+                            <p style="color:#aaa; font-size:0.9rem;">First Stage</p>
+                            <p style="margin-top:10px;">極限體能王的經典開場。挑戰者必須以斜角連續跳躍五個不穩定的踏板，稍有猶豫就會落水，考驗極致的敏捷性與節奏感。</p>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <img src="image/REBOOT LOGO background.png" onerror="this.src='https://via.placeholder.com/400x300?text=Rolling+Log'">
+                        <div class="card-content">
+                            <h3>滾木</h3>
+                            <p style="color:#aaa; font-size:0.9rem;">First Stage</p>
+                            <p style="margin-top:10px;">抱住巨大的圓柱體，隨著重力加速度旋轉滑下軌道。挑戰者必須克服暈眩感，並在落水前精準地跳往對岸。</p>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <img src="image/REBOOT LOGO background.png" onerror="this.src='https://via.placeholder.com/400x300?text=Warped+Wall'">
+                        <div class="card-content">
+                            <h3>聳立之牆</h3>
+                            <p style="color:#aaa; font-size:0.9rem;">First Stage</p>
+                            <p style="margin-top:10px;">第一舞台的最後守門員。面對高達 4.5 公尺的反曲牆，唯有足夠的助跑速度與爆發力，才能觸碰到頂端的榮耀。</p>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <img src="image/REBOOT LOGO background.png" onerror="this.src='https://via.placeholder.com/400x300?text=Spider+Walk'">
+                        <div class="card-content">
+                            <h3>蜘蛛步道</h3>
+                            <p style="color:#aaa; font-size:0.9rem;">Second Stage</p>
+                            <p style="margin-top:10px;">模仿蜘蛛的動作，利用四肢撐在兩面壓克力牆之間前進。考驗全身的協調性與核心肌群的持久力。</p>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <img src="image/REBOOT LOGO background.png" onerror="this.src='https://via.placeholder.com/400x300?text=Salmon+Ladder'">
+                        <div class="card-content">
+                            <h3>鮭魚梯</h3>
+                            <p style="color:#aaa; font-size:0.9rem;">Second Stage</p>
+                            <p style="margin-top:10px;">極限體能王最著名的象徵。利用引體向上的爆發力，將手中的橫桿一層層向上推進，是背肌力量的終極考驗。</p>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <img src="image/REBOOT LOGO background.png" onerror="this.src='https://via.placeholder.com/400x300?text=Cliffhanger'">
+                        <div class="card-content">
+                            <h3>瘋狂側壁</h3>
+                            <p style="color:#aaa; font-size:0.9rem;">Third Stage</p>
+                            <p style="margin-top:10px;">第三舞台的惡夢。僅靠手指尖扣住不到 3 公分的突起邊緣，並在懸空狀態下進行橫向移動與段差跳躍。</p>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <img src="image/REBOOT LOGO background.png" onerror="this.src='https://via.placeholder.com/400x300?text=Pipe+Slider'">
+                        <div class="card-content">
+                            <h3>管滑</h3>
+                            <p style="color:#aaa; font-size:0.9rem;">Third Stage</p>
+                            <p style="margin-top:10px;">雙腿夾住金屬管，滑行至軌道末端後，必須在瞬間準確地將身體甩出並抓住著陸點，稍有差池即刻淘汰。</p>
+                        </div>
+                    </div>
+
+                    <div class="stage-card">
+                        <img src="image/REBOOT LOGO background.png" onerror="this.src='https://via.placeholder.com/400x300?text=Final+Rope'">
+                        <div class="card-content">
+                            <h3>最終攀繩</h3>
+                            <p style="color:#aaa; font-size:0.9rem;">Final Stage</p>
+                            <p style="margin-top:10px;">通往完全制霸的最後一哩路。在有限的時間內，垂直攀爬 20 公尺以上的繩索，只有真正的王者能看見塔頂的風景。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery Section -->
+        <div id="gallery" class="page-section">
+            <div class="sub-page-header">
+                <h1>精彩瞬間</h1>
+                <p style="color: #bbb; margin-top: 15px; font-size: 1rem; letter-spacing: 1px; font-weight: normal;">
+                    圖片來源 / GYMEFIT NINJA 忍者館
+                </p>
+            </div>
+            <div class="container">
+                <div class="gallery-grid" id="galleryGrid">
+                    <div class="gallery-item" onclick="openLightbox(this)"><img src="image/gallery_01.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+01'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" onclick="openLightbox(this)"><img src="image/gallery_02.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+02'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" onclick="openLightbox(this)"><img src="image/gallery_03.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+03'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" onclick="openLightbox(this)"><img src="image/gallery_04.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+04'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" onclick="openLightbox(this)"><img src="image/gallery_05.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+05'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" onclick="openLightbox(this)"><img src="image/gallery_06.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+06'"><div class="gallery-overlay">VIEW</div></div>
+
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_07.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+07'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_08.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+08'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_09.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+09'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_10.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+10'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_11.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+11'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_12.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+12'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_13.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+13'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_14.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+14'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_15.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+15'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_16.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+16'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_17.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+17'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_18.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+18'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_19.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+19'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_20.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+20'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_21.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+21'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_22.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+22'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_23.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+23'"><div class="gallery-overlay">VIEW</div></div>
+                    <div class="gallery-item" style="display:none" onclick="openLightbox(this)"><img src="image/gallery_24.jpg" onerror="this.src='https://via.placeholder.com/600x400?text=Image+24'"><div class="gallery-overlay">VIEW</div></div>
+                </div>
+
+                <div class="load-more-btn-container">
+                    <button id="galleryLoadBtn" class="load-more-btn" onclick="loadMoreGalleryImages()">查看更多精彩瞬間</button>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
+            <span class="lightbox-close" onclick="closeLightbox(event)">&times;</span>
+            <img id="lightbox-img" src="" alt="Full view">
+        </div>
+
+        <!-- News Section -->
+        <div id="news" class="page-section">
+            <div class="sub-page-header"><h1>最新消息</h1></div>
+            <div class="container" style="max-width: 900px;" id="latest-news-container">
+                <!-- Dynamic Content Injected via JS -->
+            </div>
+        </div>
+
+        <!-- Related News Section (New Page) -->
+        <div id="news-related" class="page-section">
+            <div class="sub-page-header"><h1>相關新聞</h1></div>
+            <div class="container">
+                <div style="text-align: right; color: var(--text-secondary); margin-bottom: 20px; font-family: monospace; font-size: 0.9rem;">
+                    最後更新日期: <span id="last-updated-date">Loading...</span>
+                </div>
+
+                <div class="news-related-grid" id="news-grid-container"></div>
+                <div class="load-more-btn-container">
+                    <button id="load-more-news-btn" class="load-more-btn" onclick="loadMoreNews()">載入更多新聞</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div id="contact" class="page-section">
+            <div class="sub-page-header"><h1>聯絡我們</h1></div>
+            <div class="container">
+                <div class="contact-info-card">
+                    <p class="contact-intro">有任何問題或合作邀約，歡迎透過以下方式聯繫我們：</p>
+                    <div class="contact-methods">
+                        <!-- Updated to open Gmail directly -->
+                        <a href="https://mail.google.com/mail/?view=cm&fs=1&to=rebootpccu@gmail.com" target="_blank" rel="noopener noreferrer" class="contact-method-item">
+                            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" /></svg>
+                            <span>rebootpccu@gmail.com</span>
+                        </a>
+                        <a href="https://www.instagram.com/sasuke_reboot/" target="_blank" class="contact-method-item">
+                            <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" /></svg> Instagram
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer"><div class="container"><p>&copy; 2025 RE:BOOT Ninja Warrior. 版權所有。</p></div></footer>
+    <div class="back-to-top" onclick="scrollToTop()" id="backToTopBtn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg></div>
+
+
+    <script>
+        // --- 核心邏輯 ---
+        function toggleMenu() { document.getElementById('navMenu').classList.toggle('active'); }
+
+        function showPage(pageId) {
+            // 隱藏所有頁面
+            document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active-page'));
+
+            // 顯示目標頁面
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active-page');
+            } else {
+                console.error("Page not found:", pageId);
+                return;
+            }
+
+            // 更新導航狀態
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+            const activeLink = document.querySelector(`.nav-link[data-target="${pageId}"]`);
+            if (activeLink) activeLink.classList.add('active');
+
+            // 關閉手機版選單
+            document.getElementById('navMenu').classList.remove('active');
+            window.scrollTo(0, 0);
+
+            // 首頁動畫重置
+            if (pageId === 'home') {
+                setTimeout(() => document.querySelectorAll(".reveal").forEach(el => el.classList.remove("active")), 50);
+            }
+        }
+
+        function scrollToHomeStages(e) {
+            e.preventDefault();
+            if (!document.getElementById('home').classList.contains('active-page')) {
+                showPage('home');
+                setTimeout(() => {
+                    const target = document.getElementById('home-stages');
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else {
+                const target = document.getElementById('home-stages');
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('backToTopBtn');
+            if (window.scrollY > 300) btn.classList.add('show'); else btn.classList.remove('show');
+            if (document.getElementById('home').classList.contains('active-page')) {
+                document.querySelectorAll(".reveal").forEach(el => {
+                    if (el.getBoundingClientRect().top < window.innerHeight - 100) el.classList.add("active");
+                });
+            }
+        });
+        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        // --- 強制初始化首頁 (防止白畫面) ---
+        function initApp() {
+            // Double check existence
+            const homeSection = document.getElementById('home');
+            if (homeSection) {
+                console.log("Initializing app, home section found.");
+                showPage('home');
+                initNews();
+                // Initialize News Ticker
+                updateHeroNews();
+            } else {
+                console.error("Critical Error: Home section not found in DOM.");
+                // Fallback: try to find by class if ID is somehow stripped
+                const homeByClass = document.querySelector('.page-section');
+                if (homeByClass) {
+                    homeByClass.id = 'home'; // Restore ID if missing
+                    homeByClass.classList.add('active-page');
+                    initNews();
+                    updateHeroNews();
+                }
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+
+        // --- Hero & Background ---
+        const heroData = [
+            {
+                en: "RE:BOOT",
+                zh: "極限體能王",
+                sub: "力量、速度與敏捷的終極試煉。",
+                video: "video/5319760-uhd_3840_2160_25fps.mp4" // Pull-ups (Ninja skill)
+            },
+            {
+                en: "SPEED",
+                zh: "極速奔馳",
+                sub: "唯有速度能戰勝時間。",
+                video: "video/8544785-uhd_3840_2160_25fps.mp4" // Sprinting/Running silhouette
+            },
+            {
+                en: "POWER",
+                zh: "絕對力量",
+                sub: "鍛鍊鋼鐵般的肌肉。",
+                video: "video/5320001-uhd_3840_2160_25fps.mp4" // Battle ropes/Strength
+            }
+        ];
+
+        let heroIdx = 0;
+
+        // Preload videos to ensure smooth transitions (optional but recommended)
+        heroData.forEach(d => {
+            const link = document.createElement('link');
+            link.rel = 'preload';
+            link.as = 'video';
+            link.href = d.video;
+            document.head.appendChild(link);
+        });
+
+        setInterval(() => {
+            heroIdx = (heroIdx + 1) % heroData.length;
+            const d = heroData[heroIdx];
+
+            // Elements
+            const textContainer = document.getElementById('heroTextAnim');
+            const videoElement = document.getElementById('heroVideo');
+
+            if (textContainer && videoElement) {
+                // 1. Fade Out
+                textContainer.classList.add('fade-out');
+                videoElement.classList.add('fade-out');
+
+                setTimeout(() => {
+                    // 2. Change Content
+                    document.getElementById('heroEnTitle').textContent = d.en;
+                    document.getElementById('heroZhTitle').textContent = d.zh;
+                    document.getElementById('heroSubtitle').textContent = d.sub;
+
+                    videoElement.src = d.video;
+                    videoElement.load();
+                    videoElement.play().catch(e => console.log("Auto-play prevented:", e));
+
+                    // 3. Fade In
+                    textContainer.classList.remove('fade-out');
+                    videoElement.classList.remove('fade-out');
+                }, 500);
+            }
+        }, 5000);
+
+        // --- Legends (已新增維基百科連結) ---
+        const legendsData = [
+            {
+                id: 1,
+                name: "秋山 和彥",
+                title: "THE FIRST KING",
+                desc: "第一位完全制霸者，克服弱視的奇蹟。",
+                story: "本身患有先天性弱視，但他克服了身體的障礙，在第4屆大會中以驚人的指力與速度成為史上第一位完全制霸者。他的成功證明了極限體能王不只是身體的挑戰，更是精神的勝利。",
+                stats: ["161cm", "第4屆", "毛蟹漁師"],
+                img: "image/Gemini_Generated_Image_bca1s6bca1s6bca.png",
+                wiki: "https://ja.wikipedia.org/wiki/%E7%A7%8B%E5%B1%B1%E5%92%8C%E5%BD%A6"
+            },
+            {
+                id: 2,
+                name: "長野 誠",
+                title: "STRONGEST SHIPMAN",
+                desc: "第17屆制霸，史上最強船長。",
+                story: "第50金比羅丸的船長，一年中有大半時間都在海上度過。他在第17屆大會達成完全制霸。長野誠以其驚人的擺盪技巧與穩定的心理素質著稱，曾連續多次殺入最終關卡。",
+                stats: ["162cm", "第17屆", "船長"],
+                img: "image/Gemini_Generated_Image_t0wt7ct0wt7ct0wt.png",
+                wiki: "https://ja.wikipedia.org/wiki/%E9%95%B7%E9%87%8E%E8%AA%A0"
+            },
+            {
+                id: 3,
+                name: "漆原 裕治",
+                title: "SHOE SALESMAN",
+                desc: "史上唯一兩度制霸的男人。",
+                story: "原本是鞋類業務員，擁有輕盈的身手與極致的指力。他是史上第一位達成兩次完全制霸（第24屆、第27屆）的選手。特別擅長第三關的懸吊類關卡。",
+                stats: ["163cm", "24/27屆", "業務"],
+                img: "image/Gemini_Generated_Image_dzh6zxdzh6zxdzh6.png",
+                wiki: "https://ja.wikipedia.org/wiki/%E6%BC%86%E5%8E%9F%E8%A3%95%E6%B2%BB"
+            },
+            {
+                id: 4,
+                name: "森本 裕介",
+                title: "SASUKE-KUN",
+                desc: "為極限體能王而生的天才。",
+                story: "被稱為「SASUKE君」，從15歲就開始參賽，為了制霸而將人生全部奉獻給訓練。他將攀繩訓練到了極致，是新生代最強的王者，也是繼漆原裕治後，史上第二位達成兩次制霸的傳奇人物。",
+                stats: ["164cm", "31/38屆", "工程師"],
+                img: "image/Gemini_Generated_Image_37h4if37h4if37h4.png",
+                wiki: "https://ja.wikipedia.org/wiki/%E6%A3%AE%E6%9C%AC%E8%A3%95%E4%BB%8B"
+            }
+        ];
+
+        const grid = document.getElementById('legendsGrid');
+
+        if (grid) {
+            const displayData = [...legendsData, ...legendsData, ...legendsData];
+            grid.innerHTML = displayData.map(d => `
+                    <div class="legend-card" onclick="showLegendDetail(${d.id})">
+                        <div class="legend-icon-wrapper">
+                            <img src="${d.img}" alt="${d.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x450?text=Legend'">
+                        </div>
+                        <div class="legend-info">
+                            <div class="legend-title">${d.title}</div>
+                            <div class="legend-name">${d.name}</div>
+                            <div class="legend-achievement">${d.stats[1]}制霸</div>
+                        </div>
+                    </div>
+                `).join('');
+        }
+
+        function showLegendDetail(id) {
+            const data = legendsData.find(d => d.id === id);
+            if (!data) return;
+            // 新增來源/維基百科連結
+            document.getElementById('legendDetailContent').innerHTML = `
+                    <div class="legend-detail-img">
+                        <img src="${data.img}" alt="${data.name}" onerror="this.src='https://via.placeholder.com/400x600?text=${data.name}'">
+                    </div>
+                    <div class="legend-detail-content">
+                        <div class="legend-detail-title">${data.title}</div>
+                        <div class="legend-detail-name">${data.name}</div>
+                        <div class="legend-stats">
+                            <div class="stat-item"><h4>身高</h4><p>${data.stats[0]}</p></div>
+                            <div class="stat-item"><h4>紀錄</h4><p>${data.stats[1]}</p></div>
+                            <div class="stat-item"><h4>職業</h4><p>${data.stats[2]}</p></div>
+                        </div>
+                        <hr style="border:0; border-top:1px solid rgba(255,255,255,0.1); margin: 20px 0;">
+                        <h4 style="color:var(--accent-gold); margin-bottom:10px;">傳奇故事</h4>
+                        <p style="font-size:1.1rem;color:#ddd;line-height:1.8;">${data.story}</p>
+                        <div style="margin-top: 30px;">
+                            <a href="${data.wiki}" target="_blank" style="display:inline-block; padding:10px 20px; border:1px solid rgba(255,255,255,0.3); border-radius:30px; color:var(--text-secondary); font-size:0.9rem; transition:0.3s; text-decoration:none;">
+                                <span style="margin-right:5px;">ℹ️</span> 來源 / 維基百科
+                            </a>
+                        </div>
+                    </div>
+                `;
+            showPage('legend-detail');
+        }
+
+        let currentIndex = 0;
+        function slideStep() {
+            const firstCard = document.querySelector('.legend-card');
+            if (!firstCard || !grid) return;
+            const isMobile = window.innerWidth <= 768;
+            const gap = isMobile ? 20 : 40;
+            const itemWidth = firstCard.offsetWidth + gap;
+
+            currentIndex++;
+            const offset = currentIndex * itemWidth;
+            grid.style.transition = 'transform 0.5s ease-in-out';
+            grid.style.transform = `translateX(${-offset}px)`;
+
+            if (currentIndex >= legendsData.length * 2) {
+                setTimeout(() => {
+                    grid.style.transition = 'none';
+                    currentIndex = legendsData.length;
+                    const resetOffset = currentIndex * itemWidth;
+                    grid.style.transform = `translateX(${-resetOffset}px)`;
+                }, 500);
+            }
+        }
+
+        let autoScroll = setInterval(slideStep, 3000);
+        const legendsContainer = document.querySelector('.legends-container');
+        if (legendsContainer) {
+            legendsContainer.addEventListener('mouseenter', () => clearInterval(autoScroll));
+            legendsContainer.addEventListener('mouseleave', () => autoScroll = setInterval(slideStep, 3000));
+            legendsContainer.addEventListener('touchstart', () => clearInterval(autoScroll));
+            legendsContainer.addEventListener('touchend', () => autoScroll = setInterval(slideStep, 3000));
+        }
+
+        // --- Dynamic News Logic ---
+        function getTodayDate() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}.${month}.${day}`;
+        }
+
+        const internalNewsData = [
+            {
+                title: "慶祝RE:BOOT極限體能王YT觀看次數突破10,000次！",
+                subtitle: "未來將持續上傳極限體能王的相關影片，敬請期待！",
+                content: "感謝大家的支持！RE:BOOT極限體能王YouTube頻道總觀看次數已突破10,000次！未來將繼續持續更新影片，邁向20,000大關！"
+            },
+            {
+                title: "慶祝RE:BOOT極限體能王網站上線",
+                subtitle: "未來將透過這個網站積極推廣極限體能王這項運動！",
+                content: "我們非常高興地宣布，RE:BOOT 極限體能王官方網站正式上線了！\n\n這是一個專為熱愛極限體能王的粉絲所打造的平台。在這裡，您可以找到關於極限體能王的一切，從關卡介紹、傳奇選手的故事，到最新的賽事資訊與訓練場地推薦。"
+            },
+            {
+                title: "RE:BOOT極限體能王官方YouTube頻道已上線！",
+                subtitle: "每週固定發片，點擊連結去看看，別忘了訂閱",
+                content: "各位粉絲久等了！RE:BOOT 官方 YouTube 頻道正式開張！\n\n我們將會在頻道中分享各種精彩內容，包括國內外賽事精華剪輯與專業選手的訓練菜單大公開。"
+            },
+            {
+                title: "慶祝RE:BOOT極限體能王IG瀏覽人數突破新高",
+                subtitle: "RE:BOOT官方IG開設不到一個月，Reels觀看數即突破1.6萬",
+                content: "感謝大家的支持！RE:BOOT 官方 Instagram 開設不到一個月，Reels 短影片的總觀看數就已經突破 1.6 萬次！"
+            }
+        ];
+
+        function renderInternalNews() {
+            const container2 = document.getElementById('home-news-container');
+            const container3 = document.getElementById('latest-news-container');
+            const today = getTodayDate();
+
+            const html = internalNewsData.map((item, index) => `
+                    <div class="news-item" onclick="openNews(${index})">
+                        <div class="news-date">${today}</div>
+                        <div class="news-title">${item.title}</div>
+                        <p>${item.subtitle}</p>
+                    </div>
+                `).join('');
+
+            const relatedLink = `
+                    <div class="news-related-card" onclick="showPage('news-related')" style="cursor:pointer">
+                        <span class="news-source-badge" style="background:#444">更多資訊</span>
+                        <div class="news-related-title">查看更多相關新聞與賽事報導</div>
+                        <span class="news-related-date">來自各大體育媒體</span>
+                        <span class="news-read-more">前往專區 →</span>
+                    </div>
+                `;
+
+            if (container2) {
+                container2.innerHTML = `
+                        <div class="news-item" onclick="openNews(0)">
+                            <div class="news-date">${today}</div>
+                            <div class="news-title">${internalNewsData[0].title}</div>
+                            <p>${internalNewsData[0].subtitle}</p>
+                        </div>
+                        ${relatedLink}
+                    `;
+            }
+            if (container3) container3.innerHTML = html;
+        }
+
+        function openNews(index) {
+            const data = internalNewsData[index];
+            const today = getTodayDate();
+            document.getElementById('newsModalTitle').textContent = data.title;
+            document.getElementById('newsModalDate').textContent = today;
+            document.getElementById('newsModalBody').textContent = data.content;
+            document.getElementById('newsModal').classList.add('active');
+        }
+
+        function closeNewsModal() {
+            document.getElementById('newsModal').classList.remove('active');
+        }
+
+        const newsDatabase = [
+            { source: "Yahoo奇摩運動", title: "全球極限體能鋼鐵大賽12月登場 國際菁英強襲對決台灣冠軍", date: "2025-11-29", url: "https://tw.sports.yahoo.com" },
+            { source: "東森新聞", title: "全球極限體能鋼鐵大賽12月登場！國際菁英對決台灣冠軍", date: "2025-11-29", url: "https://news.ebc.net.tw" },
+            { source: "Yahoo奇摩運動", title: "極限》決戰臺中市府前廣場！2025「全球極限體能鋼鐵大賽」12月登場", date: "2025-11-28", url: "https://tw.sports.yahoo.com" },
+            { source: "TBS Topics", title: "『SASUKE2025』出場權爭奪戰 TVer・TBS FREE 連續5夜配信決定", date: "2025-12-01", url: "https://topics.tbs.co.jp" },
+            { source: "Modelpress", title: "「SASUKE2025」史上最大規模！A.B.C-Z塚田僚一等 100 人集結", date: "2025-11-24", url: "https://mdpr.jp" },
+            { source: "Crank-in!", title: "『SASUKE』第43回大會出場權爭奪戰，500人最終預選會配信決定", date: "2025-12-01", url: "https://www.crank-in.net" },
+            { source: "Resilite", title: "Ninja 正式加入 2028 洛杉磯奧運：透過 Master Ninja System 備戰", date: "2025-11-30", url: "https://www.resilite.com" },
+            { source: "NBC Insider", title: "American Ninja Warrior 第17季冠軍揭曉！", date: "2025-08-25", url: "https://www.nbc.com" },
+            { source: "經濟日報", title: "2025「全球極限體能鋼鐵大賽」 12月決戰臺中市府前廣場", date: "2025-11-29", url: "https://money.udn.com" },
+            { source: "ETtoday新聞雲", title: "全台最大綜合體能賽事12月登場 俄日韓菁英選手齊聚台中", date: "2025-11-29", url: "https://www.ettoday.net" },
+            { source: "自由體育", title: "全球極限體能鋼鐵大賽台中市舉行 俄羅斯、日本、韓國、香港菁英參賽", date: "2025-11-30", url: "https://sports.ltn.com.tw" },
+            { source: "巴哈姆特", title: "【情報】SASUKE World Cup 2024 (世界大賽)", date: "2024-07-10", url: "https://forum.gamer.com.tw" }
+        ];
+
+        let currentNewsIndex = 0;
+        const newsPerLoad = 6;
+        const newsContainer = document.getElementById('news-grid-container');
+        const loadMoreBtn = document.getElementById('load-more-news-btn');
+
+        // 更新最後更新日期
+        const lastUpdatedEl = document.getElementById('last-updated-date');
+        if (lastUpdatedEl) lastUpdatedEl.textContent = getTodayDate();
+
+        function renderNewsBatch() {
+            if (!newsContainer) return;
+            const endIndex = Math.min(currentNewsIndex + newsPerLoad, newsDatabase.length);
+            for (let i = currentNewsIndex; i < endIndex; i++) {
+                const news = newsDatabase[i];
+                const card = document.createElement('div');
+                card.className = 'news-related-card';
+                card.style.animationDelay = `${(i - currentNewsIndex) * 0.1}s`;
+                card.innerHTML = `
+                        <span class="news-source-badge">${news.source}</span>
+                        <div class="news-related-title">${news.title}</div>
+                        <span class="news-related-date">${news.date}</span>
+                        <a href="${news.url}" target="_blank" rel="noopener noreferrer" class="news-read-more">閱讀全文</a>
+                    `;
+                newsContainer.appendChild(card);
+            }
+            currentNewsIndex = endIndex;
+            if (currentNewsIndex >= newsDatabase.length) {
+                if (loadMoreBtn) loadMoreBtn.style.display = 'none';
+            }
+        }
+
+        function initNews() {
+            renderInternalNews();
+            if (newsContainer) {
+                newsContainer.innerHTML = '';
+                renderNewsBatch();
+            }
+        }
+
+        window.loadMoreNews = renderNewsBatch;
+
+        function updateHeroNews() {
+            const heroNewsTitle = document.getElementById('heroNewsTitle');
+            if (heroNewsTitle && internalNewsData.length > 0) {
+                heroNewsTitle.textContent = internalNewsData[0].title;
+            }
+        }
+
+        // ==========================================
+        // ===== SIMULATED AI (模擬 AI) =====
+        // ==========================================
+
+        // 關鍵字資料庫：新增 YT/IG 外部連結邏輯
+        const aiKnowledgeBase = [
+            {
+                keywords: ["yt", "youtube", "頻道", "訂閱", "影片"],
+                response: "收到！正在為您開啟 RE:BOOT 官方 YouTube 頻道，請稍等... 📺",
+                action: "https://youtube.com/channel/UCKKjNeaO-utqKn3rbh3jVQg?si=OWm9DHckGYcKE4XC"
+            },
+            {
+                keywords: ["ig", "instagram", "ins", "粉專", "追蹤"],
+                response: "沒問題！正在帶您前往 RE:BOOT 官方 Instagram，請稍等... 📸",
+                action: "https://www.instagram.com/sasuke_reboot/"
+            },
+            {
+                keywords: ["場館", "地址", "哪裡", "位置", "去", "捷運", "交通", "map", "gym"],
+                response: "我們的場館位於<b>台北市信義區基隆路一段25號1樓</b> (GYMEFIT NINJA 忍者館)。<br>您可以搭乘捷運至<b>市政府站</b>或<b>松山站</b>步行抵達。",
+                action: "gym"
+            },
+            {
+                keywords: ["關卡", "障礙", "跳", "第一關", "第二關", "第三關", "最終", "stage", "level"],
+                response: "RE:BOOT 介紹了極限體能王的四大經典關卡，包含五段跳、滾木、以及地獄般的峭壁岩。想了解各關卡的詳細攻略嗎？",
+                action: "stages"
+            },
+            {
+                keywords: ["選手", "英雄", "傳奇", "秋山", "長野", "漆原", "森本", "legend", "hero"],
+                response: "極限體能王歷史上誕生了四位完全制霸者：秋山和彥、長野誠、漆原裕治與森本裕介。他們的傳奇故事都在這裡！",
+                action: "home"
+            },
+            {
+                keywords: ["新聞", "最新", "比賽", "賽事", "news", "update"],
+                response: "最新的賽事資訊與 RE:BOOT 官方動態都整理在新聞專區了，包含 2025 鋼鐵大賽的資訊喔！",
+                action: "news"
+            },
+            {
+                keywords: ["聯絡", "合作", "信箱", "email", "contact"],
+                response: "有任何合作邀約或問題，歡迎寄信至 <b>rebootpccu@gmail.com</b>。點擊下方按鈕可以直接聯絡我們。",
+                action: "contact"
+            },
+            {
+                keywords: ["圖", "照片", "gallery", "photo"],
+                response: "想看更多精彩的賽事瞬間嗎？我們準備了精選圖輯，讓您感受現場的熱血氣氛！",
+                action: "gallery"
+            },
+            {
+                keywords: ["你好", "嗨", "hello", "hi"],
+                response: "你好！我是 RE:BOOT 的 AI 助手。您可以問我關於場館、關卡的問題，或是輸入 <b>YT</b>、<b>IG</b> 直接前往我們的社群平台喔！",
+                action: null
+            }
+        ];
+
+        function toggleSearch() {
+            const m = document.getElementById('searchModal');
+            if (m) {
+                m.classList.toggle('active');
+                if (m.classList.contains('active')) {
+                    setTimeout(() => {
+                        const inp = document.getElementById('chatInput');
+                        if (inp) inp.focus();
+                    }, 100);
+                }
+            }
+        }
+
+        const searchModal = document.getElementById('searchModal');
+        if (searchModal) {
+            searchModal.addEventListener('click', function (e) { if (e.target === this) toggleSearch(); });
+        }
+
+        function handleChat() {
+            const inp = document.getElementById('chatInput');
+            const userText = inp.value.trim().toLowerCase();
+            if (!userText) return;
+
+            addMsg(userText, 'user');
+            inp.value = '';
+
+            const typing = document.getElementById('typingIndicator');
+            if (typing) typing.style.display = 'flex';
+            const chatContainer = document.getElementById('chatContainer');
+            if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            setTimeout(() => {
+                if (typing) typing.style.display = 'none';
+                simulateAIResponse(userText);
+            }, 800);
+        }
+
+        function simulateAIResponse(text) {
+            let match = aiKnowledgeBase.find(kb => kb.keywords.some(k => text.includes(k)));
+
+            if (match) {
+                addMsg(match.response, 'ai');
+                if (match.action) {
+                    setTimeout(() => {
+                        // 修改處：判斷 action 是否為網址 (http 開頭)
+                        if (match.action.startsWith('http')) {
+                            window.open(match.action, '_blank');
+                        } else {
+                            toggleSearch();
+                            showPage(match.action);
+                            if (match.action === 'home' && (text.includes('選手') || text.includes('hero'))) {
+                                setTimeout(() => document.querySelector('.legends-section').scrollIntoView({ behavior: 'smooth' }), 500);
+                            }
+                        }
+                    }, 1500);
+                }
+            } else {
+                addMsg("抱歉，我還在學習中。🤔<br>您可以問我：<b>「場館在哪？」</b>、<b>「最新新聞」</b>，或是輸入 <b>「YT」</b>、<b>「IG」</b> 來追蹤我們！", 'ai');
+            }
+        }
+
+        function addMsg(txt, type) {
+            const chatContainer = document.getElementById('chatContainer');
+            if (!chatContainer) return;
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${type}`;
+            msgDiv.innerHTML = `<div class="msg-bubble">${txt}</div>`;
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // ==========================================
+        // ===== Lightbox Logic (精彩圖輯燈箱) =====
+        // ==========================================
+        function openLightbox(element) {
+            const img = element.querySelector('img');
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+
+            if (img && lightbox && lightboxImg) {
+                lightboxImg.src = img.src;
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden'; // 禁止背景捲動
+            }
+        }
+
+        function closeLightbox(e) {
+            // 點擊背景或關閉按鈕時觸發
+            if (e && e.target.id !== 'lightbox' && !e.target.classList.contains('lightbox-close')) return;
+
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox) {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = ''; // 恢復背景捲動
+            }
+        }
+        function loadMoreGalleryImages() {
+            // 抓取目前還被隱藏 (display: none) 的圖片
+            const hiddenItems = document.querySelectorAll('#galleryGrid .gallery-item[style*="display:none"], #galleryGrid .gallery-item[style*="display: none"]');
+
+            // 設定每次多顯示幾張
+            const itemsToLoad = 6;
+
+            for (let i = 0; i < itemsToLoad; i++) {
+                if (hiddenItems[i]) {
+                    hiddenItems[i].style.display = '';
+                    hiddenItems[i].style.animation = 'fadeIn 0.5s ease';
+                }
+            }
+
+            // 如果沒圖片了，就把按鈕藏起來
+            if (document.querySelectorAll('#galleryGrid .gallery-item[style*="display:none"], #galleryGrid .gallery-item[style*="display: none"]').length === 0) {
+                document.getElementById('galleryLoadBtn').style.display = 'none';
+            }
+        }
+
+    </script>
+</body>
+</html>
