@@ -1004,7 +1004,7 @@
                     </div>
             </section>
 
-            <section class="legends-section">
+            <section class="legends-section" id="home-legends">
                 <div class="container reveal">
                     <div class="section-header"><h2 style="color:white;text-shadow:0 0 20px rgba(255,215,0,0.4);">傳奇英雄榜</h2><p style="color:var(--accent-gold);">致敬那些超越極限、創造歷史的傳奇勇者</p></div>
                     <p style="font-size: 0.85rem; color: #777; margin-top: 5px; font-weight: normal; letter-spacing: 1px;">
@@ -1347,9 +1347,8 @@
             <div class="sub-page-header"><h1>相關新聞</h1></div>
             <div class="container">
                 <div style="text-align: right; color: var(--text-secondary); margin-bottom: 20px; font-family: monospace; font-size: 0.9rem;">
-                    最後更新日期: <span id="last-updated-date">Loading...</span>
-                </div>
-
+    最後更新日期: <span id="last-updated-date">2025.12.18</span>
+</div>
                 <div class="news-related-grid" id="news-grid-container"></div>
                 <div class="load-more-btn-container">
                     <button id="load-more-news-btn" class="load-more-btn" onclick="loadMoreNews()">載入更多新聞</button>
@@ -1666,21 +1665,25 @@
 
         const internalNewsData = [
             {
+                date: "2025.12.17",
                 title: "慶祝RE:BOOT極限體能王YT觀看次數突破10,000次！",
                 subtitle: "未來將持續上傳極限體能王的相關影片，敬請期待！",
                 content: "感謝大家的支持！RE:BOOT極限體能王YouTube頻道總觀看次數已突破10,000次！未來將繼續持續更新影片，邁向20,000大關！"
             },
-            {
+            {   
+                date: "2025.12.06",
                 title: "慶祝RE:BOOT極限體能王網站上線",
                 subtitle: "未來將透過這個網站積極推廣極限體能王這項運動！",
                 content: "我們非常高興地宣布，RE:BOOT 極限體能王官方網站正式上線了！\n\n這是一個專為熱愛極限體能王的粉絲所打造的平台。在這裡，您可以找到關於極限體能王的一切，從關卡介紹、傳奇選手的故事，到最新的賽事資訊與訓練場地推薦。"
             },
-            {
+            {   
+                date: "2025.12.06",
                 title: "RE:BOOT極限體能王官方YouTube頻道已上線！",
                 subtitle: "每週固定發片，點擊連結去看看，別忘了訂閱",
                 content: "各位粉絲久等了！RE:BOOT 官方 YouTube 頻道正式開張！\n\n我們將會在頻道中分享各種精彩內容，包括國內外賽事精華剪輯與專業選手的訓練菜單大公開。"
             },
-            {
+            {   
+                date: "2025.12.06",
                 title: "慶祝RE:BOOT極限體能王IG瀏覽人數突破新高",
                 subtitle: "RE:BOOT官方IG開設不到一個月，Reels觀看數即突破1.6萬",
                 content: "感謝大家的支持！RE:BOOT 官方 Instagram 開設不到一個月，Reels 短影片的總觀看數就已經突破 1.6 萬次！"
@@ -1688,66 +1691,74 @@
         ];
 
         function renderInternalNews() {
-            const container2 = document.getElementById('home-news-container');
-            const container3 = document.getElementById('latest-news-container');
-            const today = getTodayDate();
+    const container2 = document.getElementById('home-news-container');
+    const container3 = document.getElementById('latest-news-container');
+    // const today = getTodayDate();  <--- 這行原本的刪除或註解掉，不再需要
 
-            const html = internalNewsData.map((item, index) => `
-                    <div class="news-item" onclick="openNews(${index})">
-                        <div class="news-date">${today}</div>
-                        <div class="news-title">${item.title}</div>
-                        <p>${item.subtitle}</p>
-                    </div>
-                `).join('');
+    // 修改處：${today} 改成 ${item.date}
+    const html = internalNewsData.map((item, index) => `
+            <div class="news-item" onclick="openNews(${index})">
+                <div class="news-date">${item.date}</div>
+                <div class="news-title">${item.title}</div>
+                <p>${item.subtitle}</p>
+            </div>
+        `).join('');
 
-            const relatedLink = `
-                    <div class="news-related-card" onclick="showPage('news-related')" style="cursor:pointer">
-                        <span class="news-source-badge" style="background:#444">更多資訊</span>
-                        <div class="news-related-title">查看更多相關新聞與賽事報導</div>
-                        <span class="news-related-date">來自各大體育媒體</span>
-                        <span class="news-read-more">前往專區 →</span>
-                    </div>
-                `;
+    const relatedLink = `
+            <div class="news-related-card" onclick="showPage('news-related')" style="cursor:pointer">
+                <span class="news-source-badge" style="background:#444">更多資訊</span>
+                <div class="news-related-title">查看更多相關新聞與賽事報導</div>
+                <span class="news-related-date">來自各大體育媒體</span>
+                <span class="news-read-more">前往專區 →</span>
+            </div>
+        `;
 
-            if (container2) {
-                container2.innerHTML = `
-                        <div class="news-item" onclick="openNews(0)">
-                            <div class="news-date">${today}</div>
-                            <div class="news-title">${internalNewsData[0].title}</div>
-                            <p>${internalNewsData[0].subtitle}</p>
-                        </div>
-                        ${relatedLink}
-                    `;
-            }
-            if (container3) container3.innerHTML = html;
-        }
+    if (container2) {
+        // 修改處：首頁預覽也改成 ${internalNewsData[0].date}
+        container2.innerHTML = `
+                <div class="news-item" onclick="openNews(0)">
+                    <div class="news-date">${internalNewsData[0].date}</div>
+                    <div class="news-title">${internalNewsData[0].title}</div>
+                    <p>${internalNewsData[0].subtitle}</p>
+                </div>
+                ${relatedLink}
+            `;
+    }
+    if (container3) container3.innerHTML = html;
+}
 
         function openNews(index) {
-            const data = internalNewsData[index];
-            const today = getTodayDate();
-            document.getElementById('newsModalTitle').textContent = data.title;
-            document.getElementById('newsModalDate').textContent = today;
-            document.getElementById('newsModalBody').textContent = data.content;
-            document.getElementById('newsModal').classList.add('active');
-        }
+    const data = internalNewsData[index];
+    // const today = getTodayDate(); <--- 這行刪除，不需要了
+    
+    document.getElementById('newsModalTitle').textContent = data.title;
+    
+    // 修改處：改成 data.date
+    document.getElementById('newsModalDate').textContent = data.date; 
+    
+    document.getElementById('newsModalBody').textContent = data.content;
+    document.getElementById('newsModal').classList.add('active');
+}
 
         function closeNewsModal() {
             document.getElementById('newsModal').classList.remove('active');
         }
 
         const newsDatabase = [
-            { source: "Yahoo奇摩運動", title: "全球極限體能鋼鐵大賽12月登場 國際菁英強襲對決台灣冠軍", date: "2025-11-29", url: "https://tw.sports.yahoo.com" },
-            { source: "東森新聞", title: "全球極限體能鋼鐵大賽12月登場！國際菁英對決台灣冠軍", date: "2025-11-29", url: "https://news.ebc.net.tw" },
-            { source: "Yahoo奇摩運動", title: "極限》決戰臺中市府前廣場！2025「全球極限體能鋼鐵大賽」12月登場", date: "2025-11-28", url: "https://tw.sports.yahoo.com" },
-            { source: "TBS Topics", title: "『SASUKE2025』出場權爭奪戰 TVer・TBS FREE 連續5夜配信決定", date: "2025-12-01", url: "https://topics.tbs.co.jp" },
-            { source: "Modelpress", title: "「SASUKE2025」史上最大規模！A.B.C-Z塚田僚一等 100 人集結", date: "2025-11-24", url: "https://mdpr.jp" },
-            { source: "Crank-in!", title: "『SASUKE』第43回大會出場權爭奪戰，500人最終預選會配信決定", date: "2025-12-01", url: "https://www.crank-in.net" },
-            { source: "Resilite", title: "Ninja 正式加入 2028 洛杉磯奧運：透過 Master Ninja System 備戰", date: "2025-11-30", url: "https://www.resilite.com" },
-            { source: "NBC Insider", title: "American Ninja Warrior 第17季冠軍揭曉！", date: "2025-08-25", url: "https://www.nbc.com" },
-            { source: "經濟日報", title: "2025「全球極限體能鋼鐵大賽」 12月決戰臺中市府前廣場", date: "2025-11-29", url: "https://money.udn.com" },
-            { source: "ETtoday新聞雲", title: "全台最大綜合體能賽事12月登場 俄日韓菁英選手齊聚台中", date: "2025-11-29", url: "https://www.ettoday.net" },
-            { source: "自由體育", title: "全球極限體能鋼鐵大賽台中市舉行 俄羅斯、日本、韓國、香港菁英參賽", date: "2025-11-30", url: "https://sports.ltn.com.tw" },
-            { source: "巴哈姆特", title: "【情報】SASUKE World Cup 2024 (世界大賽)", date: "2024-07-10", url: "https://forum.gamer.com.tw" }
+            { source: "Yahoo奇摩運動", title: "全球極限體能鋼鐵大賽12月登場 國際菁英強襲對決台灣冠軍", date: "2025-11-29", url: "https://tw.sports.yahoo.com/share/c0200014-5c4e-3b1e-9ad4-9d339e162920" },
+            { source: "東森新聞", title: "全球極限體能鋼鐵大賽12月登場！國際菁英對決台灣冠軍", date: "2025-11-29", url: "https://news.ebc.net.tw/news/sport/524696" },
+            { source: "立報傳媒", title: "『公視台語台推出《台灣體能王》　百人激戰挑戰競技節目新高度", date: "2025-08-11", url: "https://www.limedia.tw/comm/62205/" },
+            { source: "Yahoo奇摩運動", title: "決戰臺中市府前廣場！2025「全球極限體能鋼鐵大賽」12月登場", date: "2025-11-28", url: "https://tw.sports.yahoo.com/share/7a868687-2abb-38cf-81ea-2c942e63242d" },
+            { source: "TBS Topics", title: "『SASUKE2025』出場權爭奪戰 TVer・TBS FREE 連續5夜配信決定", date: "2025-12-01", url: "https://topics.tbs.co.jp/article/detail/?id=22157" },
+            { source: "Modelpress", title: "「SASUKE2025」A.B.C-Z塚田僚一・えなこ・HIKAKINら挑戦者100人集結 Snow Man岩本照はコンディション不良で辞退【出場者一部解禁】", date: "2025-11-24", url: "https://mdpr.jp/news/detail/4685228" },
+            { source: "Crank-in!", title: "『SASUKE』第43回大会への出場権をかけ、トライアウトを5夜連続配信決定！", date: "2025-12-01", url: "https://www.crank-in.net/news/177660" },
+            { source: "NBC Insider", title: "The Winner of American Ninja Warrior Season 17 Has Been Revealed", date: "2025-08-25", url: "https://www.nbc.com/nbc-insider/who-won-american-ninja-warrior-season-17-winner-revealed" },
+            { source: "經濟日報", title: "2025「全球極限體能鋼鐵大賽」 12月決戰臺中市府前廣場", date: "2025-11-29", url: "https://money.udn.com/money/story/5635/9171265" },
+            { source: "ETtoday新聞雲", title: "全台最大綜合體能賽事12月登場 俄日韓菁英選手齊聚台中", date: "2025-11-29", url: "https://www.ettoday.net/news/20251129/3075782.htm" },
+            { source: "自由體育", title: "全球極限體能鋼鐵大賽台中市舉行 俄羅斯、日本、韓國、香港菁英參賽", date: "2025-11-30", url: "https://sports.ltn.com.tw/news/breakingnews/5262868" },
+            { source: "LINE TODAY", title: "全新《極限體能王》第 42 回大會結果出爐！唯一全勤「山本」宣布引退、不死鳥「白鳥」時隔 10 年復出、船長「長野誠」兒子再次突破第一關！", date: "2024-12-26", url: "https://today.line.me/tw/v3/article/Za6nXZP" },
+            { source: "巴哈姆特", title: "【情報】SASUKE 2025(43回大會）將於12月24-25日播放", date: "2024-07-10", url: "https://forum.gamer.com.tw/C.php?bsn=255&snA=477" },
+            { source: "Yahoo奇摩運動", title: "這是真的！奧運要比「極限體能王」了 日電視台社長嗨翻", date: "2023-10-26", url: "https://tw.sports.yahoo.com/share/3ab12e2b-2e46-319b-985f-6bbd0ccbe39c" },
         ];
 
         let currentNewsIndex = 0;
@@ -1755,9 +1766,7 @@
         const newsContainer = document.getElementById('news-grid-container');
         const loadMoreBtn = document.getElementById('load-more-news-btn');
 
-        // 更新最後更新日期
-        const lastUpdatedEl = document.getElementById('last-updated-date');
-        if (lastUpdatedEl) lastUpdatedEl.textContent = getTodayDate();
+        
 
         function renderNewsBatch() {
             if (!newsContainer) return;
